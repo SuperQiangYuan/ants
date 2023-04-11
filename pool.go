@@ -220,7 +220,7 @@ func (p *Pool) Submit(task func()) error {
 	if p.IsClosed() {
 		return ErrPoolClosed
 	}
-	if w := p.retrieveWorker(); w != nil {
+	if w := p.retrieveWorker(context.Background()); w != nil {
 		w.inputFunc(task)
 		return nil
 	}
@@ -233,7 +233,7 @@ func (p *Pool) SubmitWithCtx(ctx context.Context, task func()) error {
 	}
 
 	logs.CtxInfo(ctx, "pre retrieve worker")
-	if w := p.retrieveWorker(); w != nil {
+	if w := p.retrieveWorker(ctx); w != nil {
 		logs.CtxInfo(ctx, "pre input func,workerID:%d", w.getID())
 		w.inputFunc(task)
 		logs.CtxInfo(ctx, "post input func")
@@ -347,15 +347,17 @@ func (p *Pool) addWaiting(delta int) {
 }
 
 // retrieveWorker returns an available worker to run the tasks.
-func (p *Pool) retrieveWorker() (w worker) {
+func (p *Pool) retrieveWorker(ctx context.Context) (w worker) {
 	spawnWorker := func() {
 		w = p.workerCache.Get().(*goWorker)
+		logs.CtxInfo(ctx, "retrieveWorker,id:%d", w.getID())
 		w.run()
 	}
 
 	p.lock.Lock()
 	w = p.workers.detach()
 	if w != nil { // first try to fetch the worker from the queue
+		logs.CtxInfo(ctx, "detachWorker,id:%d", w.getID())
 		p.lock.Unlock()
 	} else if capacity := p.Cap(); capacity == -1 || capacity > p.Running() {
 		// if the worker queue is empty and we don't run out of the pool capacity,
@@ -363,6 +365,7 @@ func (p *Pool) retrieveWorker() (w worker) {
 		p.lock.Unlock()
 		spawnWorker()
 	} else { // otherwise, we'll have to keep them blocked and wait for at least one worker to be put back into pool.
+		logs.CtxInfo(ctx, "retrieveWorker other")
 		if p.options.Nonblocking {
 			p.lock.Unlock()
 			return
