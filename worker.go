@@ -70,10 +70,12 @@ func (w *goWorker) run(ctx context.Context) {
 			}
 			f()
 
-			logs.CtxInfo(ctx, "revertWorker id:%d", w.workerID)
+			logs.CtxInfo(ctx, "revertWorker start id:%d", w.workerID)
 			if ok := w.pool.revertWorker(w); !ok {
 				logs.CtxInfo(ctx, "revertWorker nok,id:%d", w.workerID)
 				return
+			} else {
+				logs.CtxInfo(ctx, "revertWorker finish id:%d", w.workerID)
 			}
 		}
 	}()
