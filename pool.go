@@ -23,6 +23,7 @@
 package ants
 
 import (
+	"code.byted.org/gopkg/logs"
 	"context"
 	"sync"
 	"sync/atomic"
@@ -220,6 +221,21 @@ func (p *Pool) Submit(task func()) error {
 	}
 	if w := p.retrieveWorker(); w != nil {
 		w.inputFunc(task)
+		return nil
+	}
+	return ErrPoolOverload
+}
+
+func (p *Pool) SubmitWithCtx(ctx context.Context, task func()) error {
+	if p.IsClosed() {
+		return ErrPoolClosed
+	}
+
+	logs.CtxInfo(ctx, "pre retrieve worker")
+	if w := p.retrieveWorker(); w != nil {
+		logs.CtxInfo(ctx, "pre input func")
+		w.inputFunc(task)
+		logs.CtxInfo(ctx, "post input func")
 		return nil
 	}
 	return ErrPoolOverload
