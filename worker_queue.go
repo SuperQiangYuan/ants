@@ -19,6 +19,7 @@ type worker interface {
 	lastUsedTime() time.Time
 	inputFunc(func())
 	inputParam(interface{})
+	getID() int64
 }
 
 type workerQueue interface {

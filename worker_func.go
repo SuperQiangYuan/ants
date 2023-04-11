@@ -87,3 +87,7 @@ func (w *goWorkerWithFunc) inputFunc(func()) {
 func (w *goWorkerWithFunc) inputParam(arg interface{}) {
 	w.args <- arg
 }
+
+func (w *goWorkerWithFunc) getID() int64 {
+	return 0
+}

@@ -23,6 +23,7 @@
 package ants
 
 import (
+	"fmt"
 	"runtime/debug"
 	"time"
 )
@@ -39,6 +40,8 @@ type goWorker struct {
 
 	// lastUsed will be updated when putting a worker back into queue.
 	lastUsed time.Time
+
+	workerID int64
 }
 
 // run starts a goroutine to repeat the process
@@ -65,7 +68,10 @@ func (w *goWorker) run() {
 				return
 			}
 			f()
+
+			fmt.Sprintf("revertWorker id:%d", w.workerID)
 			if ok := w.pool.revertWorker(w); !ok {
+				fmt.Sprintf("revertWorker nok,id:%d", w.workerID)
 				return
 			}
 		}
@@ -86,4 +92,8 @@ func (w *goWorker) inputFunc(fn func()) {
 
 func (w *goWorker) inputParam(interface{}) {
 	panic("unreachable")
+}
+
+func (w *goWorker) getID() int64 {
+	return w.workerID
 }

@@ -186,8 +186,9 @@ func NewPool(size int, options ...Option) (*Pool, error) {
 	}
 	p.workerCache.New = func() interface{} {
 		return &goWorker{
-			pool: p,
-			task: make(chan func(), workerChanCap),
+			workerID: time.Now().UnixNano() / 1e6,
+			pool:     p,
+			task:     make(chan func(), workerChanCap),
 		}
 	}
 	if p.options.PreAlloc {
@@ -233,7 +234,7 @@ func (p *Pool) SubmitWithCtx(ctx context.Context, task func()) error {
 
 	logs.CtxInfo(ctx, "pre retrieve worker")
 	if w := p.retrieveWorker(); w != nil {
-		logs.CtxInfo(ctx, "pre input func")
+		logs.CtxInfo(ctx, "pre input func,workerID:%d", w.getID())
 		w.inputFunc(task)
 		logs.CtxInfo(ctx, "post input func")
 		return nil
