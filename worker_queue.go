@@ -1,6 +1,7 @@
 package ants
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -14,7 +15,7 @@ var (
 )
 
 type worker interface {
-	run()
+	run(ctx context.Context)
 	finish()
 	lastUsedTime() time.Time
 	inputFunc(func())

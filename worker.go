@@ -23,7 +23,8 @@
 package ants
 
 import (
-	"fmt"
+	"code.byted.org/gopkg/logs"
+	"context"
 	"runtime/debug"
 	"time"
 )
@@ -46,7 +47,7 @@ type goWorker struct {
 
 // run starts a goroutine to repeat the process
 // that performs the function calls.
-func (w *goWorker) run() {
+func (w *goWorker) run(ctx context.Context) {
 	w.pool.addRunning(1)
 	go func() {
 		defer func() {
@@ -69,9 +70,9 @@ func (w *goWorker) run() {
 			}
 			f()
 
-			fmt.Sprintf("revertWorker id:%d", w.workerID)
+			logs.CtxInfo(ctx, "revertWorker id:%d", w.workerID)
 			if ok := w.pool.revertWorker(w); !ok {
-				fmt.Sprintf("revertWorker nok,id:%d", w.workerID)
+				logs.CtxInfo(ctx, "revertWorker nok,id:%d", w.workerID)
 				return
 			}
 		}

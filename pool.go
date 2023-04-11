@@ -236,7 +236,7 @@ func (p *Pool) SubmitWithCtx(ctx context.Context, task func()) error {
 	if w := p.retrieveWorker(ctx); w != nil {
 		logs.CtxInfo(ctx, "pre input func,workerID:%d", w.getID())
 		w.inputFunc(task)
-		logs.CtxInfo(ctx, "post input func")
+		logs.CtxInfo(ctx, "post input func,workerID:%d", w.getID())
 		return nil
 	}
 	return ErrPoolOverload
@@ -351,7 +351,7 @@ func (p *Pool) retrieveWorker(ctx context.Context) (w worker) {
 	spawnWorker := func() {
 		w = p.workerCache.Get().(*goWorker)
 		logs.CtxInfo(ctx, "retrieveWorker,id:%d", w.getID())
-		w.run()
+		w.run(ctx)
 	}
 
 	p.lock.Lock()

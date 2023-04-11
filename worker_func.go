@@ -23,6 +23,7 @@
 package ants
 
 import (
+	"context"
 	"runtime/debug"
 	"time"
 )
@@ -43,7 +44,7 @@ type goWorkerWithFunc struct {
 
 // run starts a goroutine to repeat the process
 // that performs the function calls.
-func (w *goWorkerWithFunc) run() {
+func (w *goWorkerWithFunc) run(ctx context.Context) {
 	w.pool.addRunning(1)
 	go func() {
 		defer func() {

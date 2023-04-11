@@ -339,7 +339,7 @@ func (p *PoolWithFunc) addWaiting(delta int) {
 func (p *PoolWithFunc) retrieveWorker() (w worker) {
 	spawnWorker := func() {
 		w = p.workerCache.Get().(*goWorkerWithFunc)
-		w.run()
+		w.run(context.Background())
 	}
 
 	p.lock.Lock()
